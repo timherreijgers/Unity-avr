@@ -85,21 +85,21 @@ static const char UNITY_PROGMEM UnityStrDetail2Name[]            = " " UNITY_DET
 
 /*-----------------------------------------------*/
 /* Local helper function to print characters. */
-static void UnityPrintChar(const char* pch)
+static void UnityPrintChar(const char c)
 {
     /* printable characters plus CR & LF are printed */
-    if ((*pch <= 126) && (*pch >= 32))
+    if ((c <= 126) && (c >= 32))
     {
-        UNITY_OUTPUT_CHAR(*pch);
+        UNITY_OUTPUT_CHAR(c);
     }
     /* write escaped carriage returns */
-    else if (*pch == 13)
+    else if (c == 13)
     {
         UNITY_OUTPUT_CHAR('\\');
         UNITY_OUTPUT_CHAR('r');
     }
     /* write escaped line feeds */
-    else if (*pch == 10)
+    else if (c == 10)
     {
         UNITY_OUTPUT_CHAR('\\');
         UNITY_OUTPUT_CHAR('n');
@@ -109,7 +109,7 @@ static void UnityPrintChar(const char* pch)
     {
         UNITY_OUTPUT_CHAR('\\');
         UNITY_OUTPUT_CHAR('x');
-        UnityPrintNumberHex((UNITY_UINT)*pch, 2);
+        UnityPrintNumberHex((UNITY_UINT)c, 2);
     }
 }
 
@@ -135,13 +135,15 @@ static UNITY_UINT UnityPrintAnsiEscapeString(const char* string)
 #endif
 
 /*-----------------------------------------------*/
-void UnityPrint(const char* string)
+void UnityPrint(const char * string)
 {
-    const char* pch = string;
+    const char * pch = string;
 
     if (pch != NULL)
     {
-        while (*pch)
+        char c = (char)pgm_read_byte(pch);
+
+        while (c)
         {
 #ifdef UNITY_OUTPUT_COLOR
             /* print ANSI escape code */
@@ -151,8 +153,9 @@ void UnityPrint(const char* string)
                 continue;
             }
 #endif
-            UnityPrintChar(pch);
+            UnityPrintChar(c);
             pch++;
+            c = (char)pgm_read_byte(pch);
         }
     }
 }
@@ -163,21 +166,23 @@ void UnityPrintLen(const char* string, const UNITY_UINT32 length)
 
     if (pch != NULL)
     {
-        while (*pch && ((UNITY_UINT32)(pch - string) < length))
+        char c = (char)pgm_read_byte(pch);
+
+        while (c && ((UNITY_UINT32)(pch - string) < length))
         {
             /* printable characters plus CR & LF are printed */
-            if ((*pch <= 126) && (*pch >= 32))
+            if ((c <= 126) && (c >= 32))
             {
-                UNITY_OUTPUT_CHAR(*pch);
+                UNITY_OUTPUT_CHAR(c);
             }
             /* write escaped carriage returns */
-            else if (*pch == 13)
+            else if (c == 13)
             {
                 UNITY_OUTPUT_CHAR('\\');
                 UNITY_OUTPUT_CHAR('r');
             }
             /* write escaped line feeds */
-            else if (*pch == 10)
+            else if (c == 10)
             {
                 UNITY_OUTPUT_CHAR('\\');
                 UNITY_OUTPUT_CHAR('n');
@@ -187,9 +192,10 @@ void UnityPrintLen(const char* string, const UNITY_UINT32 length)
             {
                 UNITY_OUTPUT_CHAR('\\');
                 UNITY_OUTPUT_CHAR('x');
-                UnityPrintNumberHex((UNITY_UINT)*pch, 2);
+                UnityPrintNumberHex((UNITY_UINT)c, 2);
             }
             pch++;
+            c = (char)pgm_read_byte(pch);
         }
     }
 }
